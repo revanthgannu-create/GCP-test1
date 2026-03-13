@@ -1,0 +1,38 @@
+# step1:
+customer_lo = spark.read.csv("dbfs:/FileStore/usecase/customer_lo.csv", header=True, inferSchema=True)
+customer_lo.show()
+
+# step2:
+customer_ny = spark.read.csv("dbfs:/FileStore/usecase/customer_ny.csv", header=True, inferSchema=True)
+customer_ny.show()
+
+# step3:
+customer_union = customer_lo.union(customer_ny)
+customer_union.show()
+
+# step4:
+custmer_union_filter = customer_union.filter(customer_union.grade == 200)
+custmer_union_filter.show()
+
+# step5:
+from pyspark.sql.functions import when, lit, col
+customer_union_filter_addColumn = customer_union_filter.withColumn(
+    "cntry_shtct",
+    when((col("city") == "London"), lit("LO")).otherwise(lit("Ny"))
+)
+customer_union_filter_addColumn.show()
+
+# step7:
+customer_union_filter_addColumn.write.format("parquet").mode("overwrite").save("dbfs:/FileStore/usecase_tgt/")
+
+# step8:
+%fs ls dbfs:/FileStore/usecase_tgt/
+
+
+
+Assignment: {databricks}
+--------
+A1: Approach1 whatever we discussed above
+A2: Approach2 whatever we discussed above
+
+A3: Do this Spark DSL approach on Data proc cluster
